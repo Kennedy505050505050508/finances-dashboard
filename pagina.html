@@ -1,0 +1,902 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard Financeiro Pessoal</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --text:#121417;
+      --muted:#5b616a;
+      --border:#e9edf2;
+      --card:#ffffff;
+      --orange:#ff7a00;
+      --orange2:#f36f00;
+      --green:#16a34a;
+      --red:#dc2626;
+      --shadow: 0 6px 18px rgba(18,20,23,.06);
+      --radius: 14px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #fafafa;
+      color: var(--text);
+    }
+
+    /* Layout principal (sempre dentro da tela) */
+    .page{
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 12px 12px 24px;
+    }
+
+    header{
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: var(--shadow);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+    }
+
+    .brand h1{
+      margin:0;
+      font-size: 18px;
+      color: var(--orange2);
+      letter-spacing:.2px;
+    }
+    .brand p{
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.3;
+    }
+
+    .header-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 10px;
+      justify-content:flex-end;
+      align-items:center;
+      min-width: 220px;
+    }
+
+    .chip{
+      border:1px solid var(--border);
+      background:#fff;
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 13px;
+      color: var(--muted);
+      display:flex;
+      gap:8px;
+      align-items:center;
+      white-space:nowrap;
+    }
+    .dot{
+      width:10px;height:10px;border-radius:50%;
+      background: var(--orange);
+      display:inline-block;
+    }
+
+    .grid{
+      margin-top: 12px;
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+    }
+
+    .card{
+      background: var(--card);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 12px;
+      overflow:hidden; /* evita "sair" da borda */
+    }
+
+    .col-12{ grid-column: span 12; }
+    .col-6{ grid-column: span 6; }
+    .col-4{ grid-column: span 4; }
+    .col-8{ grid-column: span 8; }
+
+    @media (max-width: 900px){
+      .col-8{ grid-column: span 12; }
+      .col-6{ grid-column: span 12; }
+      .col-4{ grid-column: span 6; }
+      header{ flex-direction:column; }
+      .header-actions{ justify-content:flex-start; }
+    }
+    @media (max-width: 520px){
+      .page{ padding: 10px 10px 20px; }
+      .col-4{ grid-column: span 12; }
+      header{ padding: 12px; }
+    }
+
+    .section-title{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 10px;
+    }
+    .section-title h2{
+      margin:0;
+      font-size: 15px;
+    }
+    .section-title span{
+      font-size: 12px;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+
+    .kpi{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .kpi .label{
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .kpi .value{
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -.2px;
+      margin-top: 4px;
+      word-break: break-word;
+    }
+    .badge{
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+    .badge.in{ color: var(--green); border-color: rgba(22,163,74,.18); background: rgba(22,163,74,.06); }
+    .badge.out{ color: var(--red); border-color: rgba(220,38,38,.18); background: rgba(220,38,38,.06); }
+
+    /* Form */
+    form{
+      display:grid;
+      gap: 10px;
+    }
+    .form-row{
+      display:grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 10px;
+    }
+    .form-row-3{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 700px){
+      .form-row{ grid-template-columns: 1fr; }
+      .form-row-3{ grid-template-columns: 1fr; }
+    }
+
+    label{
+      font-size: 12px;
+      color: var(--muted);
+      display:block;
+      margin-bottom: 6px;
+    }
+    input, select, button{
+      width:100%;
+      font-size: 14px;
+      padding: 10px 10px;
+      border-radius: 10px;
+      border: 1px solid #e6eaf0;
+      outline: none;
+      background:#fff;
+      color: var(--text);
+    }
+    input:focus, select:focus{
+      border-color: rgba(255,122,0,.55);
+      box-shadow: 0 0 0 3px rgba(255,122,0,.18);
+    }
+
+    .amount-group{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .btn{
+      border:none;
+      cursor:pointer;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--orange), var(--orange2));
+      color:#fff;
+      padding: 11px 10px;
+    }
+    .btn:hover{ filter: brightness(1.02); }
+    .btn:active{ transform: translateY(1px); }
+
+    .btn-secondary{
+      background:#fff;
+      color: var(--orange2);
+      border: 1px solid rgba(255,122,0,.35);
+      font-weight: 800;
+    }
+    .btn-danger{
+      background:#fff;
+      color: var(--red);
+      border: 1px solid rgba(220,38,38,.28);
+      font-weight: 800;
+    }
+
+    .helper{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: -4px;
+      line-height: 1.3;
+    }
+
+    /* Gráfico por categorias (barra horizontal) */
+    .bar-wrap{
+      display:grid;
+      gap: 10px;
+    }
+    .bar{
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 10px;
+      background:#fff;
+    }
+    .bar-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom: 8px;
+    }
+    .bar-name{
+      font-weight: 800;
+      font-size: 13px;
+      color: #1f2937;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width: 65%;
+    }
+    .bar-value{
+      font-weight: 800;
+      font-size: 13px;
+      color: var(--muted);
+      white-space:nowrap;
+    }
+    .track{
+      width:100%;
+      height: 12px;
+      border-radius: 999px;
+      background: #f1f3f6;
+      overflow:hidden;
+    }
+    .fill{
+      height:100%;
+      width: 30%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(255,122,0,.95), rgba(243,111,0,.95));
+    }
+
+    .fill.in{ background: linear-gradient(90deg, rgba(22,163,74,.95), rgba(34,197,94,.95)); }
+    .fill.out{ background: linear-gradient(90deg, rgba(220,38,38,.95), rgba(239,68,68,.95)); }
+
+    /* Tabela */
+    .table{
+      width:100%;
+      border-collapse: collapse;
+      overflow:hidden;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background:#fff;
+    }
+    .table th, .table td{
+      padding: 10px 10px;
+      border-bottom: 1px solid var(--border);
+      text-align:left;
+      font-size: 13px;
+      vertical-align:top;
+    }
+    .table th{
+      font-size: 12px;
+      color: var(--muted);
+      background:#fbfbfb;
+    }
+    .table tr:last-child td{ border-bottom:none; }
+
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background:#fff;
+      font-weight: 800;
+      font-size: 12px;
+      white-space:nowrap;
+    }
+    .tag.in{ color: var(--green); border-color: rgba(22,163,74,.20); background: rgba(22,163,74,.06); }
+    .tag.out{ color: var(--red); border-color: rgba(220,38,38,.20); background: rgba(220,38,38,.06); }
+
+    .right-text{ text-align:right; }
+    .muted{ color: var(--muted); }
+    .no-data{
+      padding: 16px 10px;
+      border: 1px dashed #e3e7ee;
+      border-radius: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      background:#fff;
+      text-align:center;
+    }
+
+    /* Evitar quebra ruim em celular */
+    .nowrap{ white-space:nowrap; }
+    .money{
+      font-variant-numeric: tabular-nums;
+      font-weight: 900;
+      letter-spacing: -.2px;
+      word-break: break-word;
+    }
+
+    /* Rodapé */
+    footer{
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align:center;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="brand">
+        <h1>Dashboard Financeiro Pessoal</h1>
+        <p>Adicione entradas/saídas, escolha o mês e acompanhe seus números em tempo real.</p>
+      </div>
+      <div class="header-actions">
+        <div class="chip"><span class="dot"></span> Dados salvos no celular</div>
+        <div class="chip" id="monthChip">Mês: —</div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- KPIs -->
+      <section class="card col-4">
+        <div class="section-title">
+          <h2>Saldo do mês</h2>
+          <span id="saldoSub">—</span>
+        </div>
+        <div class="kpi">
+          <div>
+            <div class="label">Saldo</div>
+            <div class="value money" id="kpiSaldo">R$ 0,00</div>
+          </div>
+          <div class="badge" id="saldoBadge">—</div>
+        </div>
+      </section>
+
+      <section class="card col-4">
+        <div class="section-title">
+          <h2>Entradas</h2>
+          <span>Receitas</span>
+        </div>
+        <div class="kpi">
+          <div>
+            <div class="label">Total</div>
+            <div class="value money" id="kpiEntradas">R$ 0,00</div>
+          </div>
+          <div class="badge in">+ In</div>
+        </div>
+      </section>
+
+      <section class="card col-4">
+        <div class="section-title">
+          <h2>Saídas</h2>
+          <span>Despesas</span>
+        </div>
+        <div class="kpi">
+          <div>
+            <div class="label">Total</div>
+            <div class="value money" id="kpiSaidas">R$ 0,00</div>
+          </div>
+          <div class="badge out">- Out</div>
+        </div>
+      </section>
+
+      <!-- Filtro + Cadastro -->
+      <section class="card col-6">
+        <div class="section-title">
+          <h2>Escolher mês</h2>
+          <span>Filtra tudo</span>
+        </div>
+
+        <form id="filterForm" autocomplete="off">
+          <div class="form-row">
+            <div>
+              <label for="monthInput">Mês</label>
+              <input id="monthInput" type="month" required />
+            </div>
+            <div>
+              <label for="viewMode">Visualização</label>
+              <select id="viewMode">
+                <option value="all" selected>Entradas e saídas</option>
+                <option value="income">Apenas entradas</option>
+                <option value="expense">Apenas saídas</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="helper">
+            Dica: em celular, role para ver a lista e as categorias.
+          </div>
+        </form>
+      </section>
+
+      <section class="card col-6">
+        <div class="section-title">
+          <h2>Adicionar transação</h2>
+          <span>Cria/atualiza</span>
+        </div>
+
+        <form id="txForm" autocomplete="off">
+          <div class="form-row">
+            <div>
+              <label for="txType">Tipo</label>
+              <select id="txType" required>
+                <option value="income" selected>Entrada</option>
+                <option value="expense">Saída</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="txDate">Data</label>
+              <input id="txDate" type="date" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div>
+              <label for="txCategory">Categoria</label>
+              <input id="txCategory" type="text" placeholder="Ex: Salário, Aluguel, Mercado..." required />
+            </div>
+
+            <div>
+              <label for="txAmount">Valor (R$)</label>
+              <input id="txAmount" type="number" step="0.01" min="0" placeholder="0,00" required />
+            </div>
+          </div>
+
+          <div>
+            <label for="txNote">Descrição (opcional)</label>
+            <input id="txNote" type="text" placeholder="Ex: Trabalho remoto / Conta de luz..." />
+          </div>
+
+          <button class="btn" type="submit">Salvar</button>
+          <div class="helper">Não precisa back-end. Tudo é salvo no seu navegador.</div>
+        </form>
+      </section>
+
+      <!-- Gráfico por categoria -->
+      <section class="card col-8">
+        <div class="section-title">
+          <h2>Categorias (por valor)</h2>
+          <span id="catsSub">—</span>
+        </div>
+
+        <div class="bar-wrap" id="bars">
+          <!-- preenchido pelo JS -->
+        </div>
+      </section>
+
+      <!-- Lista -->
+      <section class="card col-4">
+        <div class="section-title">
+          <h2>Transações</h2>
+          <span id="countSub">—</span>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-bottom:10px;">
+          <button class="btn-secondary" id="exportBtn" type="button" style="width:50%;">Exportar</button>
+          <button class="btn-danger" id="clearBtn" type="button" style="width:50%;">Limpar</button>
+        </div>
+
+        <div style="overflow:auto; max-height: 420px;">
+          <table class="table" aria-label="Lista de transações">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Categoria</th>
+                <th class="right-text">Valor</th>
+              </tr>
+            </thead>
+            <tbody id="txTbody">
+              <!-- preenchido pelo JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="no-data" id="noData" style="display:none; margin-top:10px;">
+          Nenhuma transação para este mês/filtro.
+        </div>
+      </section>
+
+      <section class="card col-12">
+        <div class="section-title">
+          <h2>Detalhes (tabela completa)</h2>
+          <span>Para conferir e remover</span>
+        </div>
+
+        <div style="overflow:auto;">
+          <table class="table" aria-label="Tabela completa">
+            <thead>
+              <tr>
+                <th style="min-width:92px;">Data</th>
+                <th>Tipo</th>
+                <th>Categoria</th>
+                <th>Descrição</th>
+                <th class="right-text" style="min-width:110px;">Valor</th>
+                <th style="min-width:80px;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="txFullTbody">
+              <!-- JS -->
+            </tbody>
+          </table>
+        </div>
+        <div class="helper">
+          Toque em “Remover” para excluir uma transação.
+        </div>
+      </section>
+    </div>
+
+    <footer>Feito para uso pessoal. Layout responsivo para celular.</footer>
+  </div>
+
+  <script>
+    // ===== Utilidades =====
+    const $ = (id) => document.getElementById(id);
+
+    function formatBRL(n){
+      const v = Number(n || 0);
+      return v.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+    }
+
+    function pad2(x){ return String(x).padStart(2,'0'); }
+
+    function monthKeyFromDate(dateObj){
+      // YYYY-MM
+      const y = dateObj.getFullYear();
+      const m = pad2(dateObj.getMonth()+1);
+      return `${y}-${m}`;
+    }
+
+    function dateToISO(dateObj){
+      const y = dateObj.getFullYear();
+      const m = pad2(dateObj.getMonth()+1);
+      const d = pad2(dateObj.getDate());
+      return `${y}-${m}-${d}`;
+    }
+
+    function parseMonthKeyToRange(monthKey){
+      // retorna start/end do mês em strings ISO
+      const [y, m] = monthKey.split('-').map(Number);
+      const start = new Date(y, m-1, 1, 0,0,0,0);
+      const end = new Date(y, m, 0, 23,59,59,999);
+      return { start, end };
+    }
+
+    // ===== Armazenamento =====
+    const STORAGE_KEY = 'financeira_pessoal_v1';
+
+    function loadData(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(!raw) return [];
+        const parsed = JSON.parse(raw);
+        if(Array.isArray(parsed)) return parsed;
+        return [];
+      }catch{
+        return [];
+      }
+    }
+
+    function saveData(arr){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+    }
+
+    function uid(){
+      return Math.random().toString(16).slice(2) + '-' + Date.now().toString(16);
+    }
+
+    // ===== Estado =====
+    let data = loadData();
+
+    // ===== Inicialização dos inputs =====
+    const today = new Date();
+    const currentMonthKey = monthKeyFromDate(today);
+
+    $('monthInput').value = currentMonthKey;
+    $('txDate').value = dateToISO(today);
+
+    function getSelectedMonthKey(){ return $('monthInput').value; }
+    function getViewMode(){ return $('viewMode').value; } // all/income/expense
+
+    // ===== Lógica de filtros =====
+    function filterTransactionsForMonth(){
+      const monthKey = getSelectedMonthKey();
+      const { start, end } = parseMonthKeyToRange(monthKey);
+      const mode = getViewMode();
+
+      return data.filter(tx => {
+        const txDate = new Date(tx.date + 'T00:00:00');
+        const inMonth = txDate >= start && txDate <= end;
+
+        if(!inMonth) return false;
+
+        if(mode === 'income') return tx.type === 'income';
+        if(mode === 'expense') return tx.type === 'expense';
+        return true; // all
+      }).sort((a,b) => (b.date.localeCompare(a.date)) || (b.createdAt - a.createdAt));
+    }
+
+    // ===== Gráficos (barras por categoria) =====
+    function buildCategoryBars(txs){
+      const catsSub = $('catsSub');
+
+      // categoria -> soma (considera sinal conforme tipo)
+      // Para manter simples:
+      // - se viewMode=all: agrupamos entradas e saídas separadamente por tipo+categoria (vou juntar pelo nome, mas a barra indica cor pelo "saldo por tipo")
+      // - melhor: separar por tipo+categoria para refletir cor.
+      // vamos fazer:
+      // key = `${type}::${category}`
+
+      const mode = getViewMode();
+      const map = new Map(); // key -> { type, category, amount }
+
+      for(const tx of txs){
+        const category = (tx.category || 'Sem categoria').trim();
+        const key = `${tx.type}::${category}`;
+
+        const prev = map.get(key) || { type: tx.type, category, amount: 0 };
+        prev.amount += Number(tx.amount || 0);
+        map.set(key, prev);
+      }
+
+      let arr = Array.from(map.values());
+      arr.sort((a,b)=> b.amount - a.amount);
+
+      // Soma total para subtexto
+      const totalIn = txs.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount||0),0);
+      const totalOut = txs.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount||0),0);
+      const monthKey = getSelectedMonthKey();
+
+      let modeLabel = (mode==='income') ? 'Entradas' : (mode==='expense') ? 'Saídas' : 'Entradas e Saídas';
+      catsSub.textContent = `${modeLabel} • ${monthKey}`;
+
+      // Max para normalizar barras
+      const maxAmount = arr[0]?.amount || 0;
+
+      const barsEl = $('bars');
+      barsEl.innerHTML = '';
+
+      if(arr.length === 0){
+        barsEl.innerHTML = `<div class="no-data">Sem dados para as categorias neste filtro.</div>`;
+        return;
+      }
+
+      for(const item of arr.slice(0, 8)){ // limitar para ficar limpo no celular
+        const percent = maxAmount ? (item.amount / maxAmount) * 100 : 0;
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+
+        const fillClass = item.type === 'income' ? 'fill in' : 'fill out';
+        const tagFill = item.type === 'income' ? 'Entrada' : 'Saída';
+
+        bar.innerHTML = `
+          <div class="bar-top">
+            <div class="bar-name" title="${item.category}">${item.category}</div>
+            <div class="bar-value">
+              <span class="nowrap">${tagFill}</span> • ${formatBRL(item.amount)}
+            </div>
+          </div>
+          <div class="track" aria-hidden="true">
+            <div class="${fillClass}" style="width:${Math.max(6, percent)}%"></div>
+          </div>
+        `;
+        barsEl.appendChild(bar);
+      }
+    }
+
+    // ===== KPIs =====
+    function updateKPIs(txs){
+      const entradas = txs.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount||0),0);
+      const saidas = txs.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount||0),0);
+      const saldo = entradas - saidas;
+
+      $('kpiEntradas').textContent = formatBRL(entradas);
+      $('kpiSaidas').textContent = formatBRL(saidas);
+      $('kpiSaldo').textContent = formatBRL(saldo);
+
+      const badge = $('saldoBadge');
+      if(saldo >= 0){
+        badge.textContent = 'Positivo';
+        badge.className = 'badge in';
+      }else{
+        badge.textContent = 'Negativo';
+        badge.className = 'badge out';
+      }
+
+      $('saldoSub').textContent = `Entradas - Saídas`;
+      $('monthChip').textContent = `Mês: ${getSelectedMonthKey()}`;
+    }
+
+    // ===== Tabelas =====
+    function renderTables(txs){
+      const tbody = $('txTbody');
+      const fullTbody = $('txFullTbody');
+      const noData = $('noData');
+
+      tbody.innerHTML = '';
+      fullTbody.innerHTML = '';
+
+      $('countSub').textContent = `${txs.length} registro(s)`;
+
+      if(txs.length === 0){
+        noData.style.display = 'block';
+        tbody.innerHTML = '';
+        fullTbody.innerHTML = `<tr><td colspan="6" class="muted" style="text-align:center;">Sem dados</td></tr>`;
+        return;
+      }
+      noData.style.display = 'none';
+
+      for(const tx of txs.slice(0, 20)){ // lista lateral curta
+        const tr = document.createElement('tr');
+        const tipoClass = tx.type === 'income' ? 'in' : 'out';
+        const tipoText = tx.type === 'income' ? 'Entrada' : 'Saída';
+
+        tr.innerHTML = `
+          <td>
+            <span class="tag ${tipoClass}">${tipoText}</span>
+          </td>
+          <td title="${(tx.category||'').trim()}">${(tx.category||'Sem categoria').trim()}</td>
+          <td class="right-text money">${formatBRL(tx.amount || 0)}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+
+      for(const tx of txs){ // tabela completa (tudo do filtro)
+        const tr = document.createElement('tr');
+        const tipoClass = tx.type === 'income' ? 'in' : 'out';
+        const tipoText = tx.type === 'income' ? 'Entrada' : 'Saída';
+        const desc = (tx.note || '').trim();
+
+        tr.innerHTML = `
+          <td class="nowrap">${tx.date}</td>
+          <td><span class="tag ${tipoClass}">${tipoText}</span></td>
+          <td title="${(tx.category||'').trim()}">${(tx.category||'Sem categoria').trim()}</td>
+          <td class="muted" title="${desc || ''}">${desc || '-'}</td>
+          <td class="right-text money">${formatBRL(tx.amount || 0)}</td>
+          <td>
+            <button type="button" class="btn-danger" style="padding:8px 10px; border-radius:10px;"
+              data-remove="${tx.id}" aria-label="Remover transação">Remover</button>
+          </td>
+        `;
+        fullTbody.appendChild(tr);
+      }
+    }
+
+    function refresh(){
+      const txs = filterTransactionsForMonth();
+      updateKPIs(txs);
+      buildCategoryBars(txs);
+      renderTables(txs);
+    }
+
+    // ===== Eventos =====
+    $('filterForm').addEventListener('change', refresh);
+    $('viewMode').addEventListener('change', refresh);
+    $('monthInput').addEventListener('change', () => {
+      // opcional: manter data do cadastro no mês selecionado
+      // para o usuário: ajusta txDate para o mês escolhido mantendo o dia do mês atual (se possível)
+      const monthKey = getSelectedMonthKey();
+      const date = $('txDate').value ? new Date($('txDate').value + 'T00:00:00') : new Date();
+      const [y,m] = monthKey.split('-').map(Number);
+      const day = Math.min(date.getDate(), new Date(y, m, 0).getDate());
+      $('txDate').value = `${y}-${pad2(m)}-${pad2(day)}`;
+      refresh();
+    });
+
+    $('txForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const type = $('txType').value; // income/expense
+      const date = $('txDate').value;
+      const category = $('txCategory').value.trim();
+      const amount = Number($('txAmount').value);
+      const note = $('txNote').value.trim();
+
+      if(!date || !category || !Number.isFinite(amount) || amount <= 0){
+        alert('Preencha corretamente: tipo, data, categoria e valor maior que 0.');
+        return;
+      }
+
+      const tx = {
+        id: uid(),
+        type,
+        date,
+        category,
+        amount,
+        note,
+        createdAt: Date.now()
+      };
+
+      data.push(tx);
+      saveData(data);
+
+      // limpar campos
+      $('txCategory').value = '';
+      $('txAmount').value = '';
+      $('txNote').value = '';
+
+      refresh();
+    });
+
+    // Delegação de eventos para remover
+    $('txFullTbody').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-remove]');
+      if(!btn) return;
+
+      const id = btn.getAttribute('data-remove');
+      const ok = confirm('Remover esta transação?');
+      if(!ok) return;
+
+      data = data.filter(x => x.id !== id);
+      saveData(data);
+      refresh();
+    });
+
+    // Exportar
+    $('exportBtn').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'financeiro_pessoal_export.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    // Limpar (tudo)
+    $('clearBtn').addEventListener('click', () => {
+      const ok = confirm('Tem certeza que deseja apagar TODAS as transações salvas?');
+      if(!ok) return;
+      data = [];
+      saveData(data);
+      refresh();
+    });
+
+    // Inicial
+    refresh();
+  </script>
+</body>
+</html>

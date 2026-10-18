@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastro</title>
+  <style>
+    body{
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:#ffffff;
+      color:#222;
+    }
+    .wrap{
+      max-width:420px;
+      margin:60px auto;
+      padding:16px;
+      border:1px solid #eee;
+      border-radius:8px;
+    }
+    h1{
+      margin:0 0 8px;
+      font-size:22px;
+      color:#ff7a00;
+    }
+    p{ margin:0 0 16px; color:#555; font-size:14px; }
+    label{ display:block; margin-top:10px; font-size:14px; color:#333; }
+    input{
+      width:100%;
+      padding:10px;
+      margin-top:6px;
+      border:1px solid #ddd;
+      border-radius:6px;
+      outline:none;
+    }
+    input:focus{ border-color:#ff7a00; }
+    .btn{
+      margin-top:16px;
+      width:100%;
+      padding:11px;
+      border:none;
+      border-radius:6px;
+      background:#ff7a00;
+      color:#fff;
+      font-weight:700;
+      cursor:pointer;
+    }
+    .btn:hover{ background:#f36f00; }
+    .link{
+      margin-top:12px;
+      text-align:center;
+      font-size:14px;
+      color:#555;
+    }
+    .link a{ color:#ff7a00; text-decoration:none; font-weight:700; }
+    .link a:hover{ text-decoration:underline; }
+    .msg{
+      margin-top:12px;
+      padding:10px;
+      border-radius:6px;
+      display:none;
+      font-size:14px;
+    }
+    .msg.ok{ background:#fff3e8; border:1px solid #ffd3b0; color:#7a3d00; }
+    .msg.err{ background:#ffecec; border:1px solid #ffb3b3; color:#8a0000; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Cadastro</h1>
+    <p>Preencha os dados para criar sua conta.</p>
+
+    <form id="registerForm" action="#" method="post">
+      <label for="name">Nome</label>
+      <input id="name" name="name" type="text" required />
+
+      <label for="email">E-mail</label>
+      <input id="email" name="email" type="email" required />
+
+      <label for="password">Senha</label>
+      <input id="password" name="password" type="password" minlength="6" required />
+
+      <label for="password2">Confirmar senha</label>
+      <input id="password2" name="password2" type="password" minlength="6" required />
+
+      <button class="btn" type="submit">Cadastrar</button>
+
+      <div id="msg" class="msg" role="status" aria-live="polite"></div>
+
+      <div class="link">
+        Já tem conta?
+        <a href="login.html">Faça login</a>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('registerForm');
+    const msg = document.getElementById('msg');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const password = document.getElementById('password').value;
+      const password2 = document.getElementById('password2').value;
+
+      msg.style.display = 'block';
+
+      if (password !== password2) {
+        msg.className = 'msg err';
+        msg.textContent = 'As senhas não são iguais.';
+        return;
+      }
+
+      // Demo (sem back-end)
+      msg.className = 'msg ok';
+      msg.textContent = 'Cadastro enviado (demo). Agora faça login.';
+      setTimeout(() => (window.location.href = 'login.html'), 900);
+    });
+  </script>
+</body>
+</html>
+
